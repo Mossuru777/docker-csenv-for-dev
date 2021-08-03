@@ -1,0 +1,11 @@
+# Set default values for all following accounts.
+defaults
+
+# Define account
+account dev
+host smtp_hostname.invalid
+from dev@own_hostname.invalid
+auth off
+
+# Set a default account
+account default : dev

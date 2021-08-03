@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  csenv:
+    build:
+      context: .
+    ports:
+      - "80:80"
+      - "7080:7080"
+      - "7765:7765"
+    volumes:
+#      - /foo/bar:/var/www/html
+
+    environment:
+      PERL5_DEBUG_ROLE: "server"
+      PERL5_DEBUG_PORT: "7765"
+      SMTP_HOSTNAME: "maildev"
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+    environment:
+      MAILDEV_PORT_25_TCP_PORT: "25"

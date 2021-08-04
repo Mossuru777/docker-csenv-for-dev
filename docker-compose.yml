@@ -8,8 +8,10 @@ services:
       - "80:80"
       - "7080:7080"
       - "7765:7765"
-    volumes:
-#      - /foo/bar:/var/www/html
+#    volumes:
+#      - type: bind
+#        source: "/foo/bar
+#        target: "/var/www/html"
 
     environment:
       PERL5_DEBUG_ROLE: "server"

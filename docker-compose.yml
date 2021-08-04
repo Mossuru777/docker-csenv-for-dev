@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
   csenv:
-    build:
-      context: .
+    image: ghcr.io/mossuru777/docker-csenv-for-dev/csenv-for-dev:latest
     hostname: csenv.test
     ports:
       - "80:80"

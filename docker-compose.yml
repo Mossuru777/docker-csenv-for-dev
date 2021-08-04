@@ -4,6 +4,7 @@ services:
   csenv:
     build:
       context: .
+    hostname: csenv.test
     ports:
       - "80:80"
       - "7080:7080"
@@ -16,10 +17,11 @@ services:
     environment:
       PERL5_DEBUG_ROLE: "server"
       PERL5_DEBUG_PORT: "7765"
-      SMTP_HOSTNAME: "maildev"
+      SMTP_HOSTNAME: "maildev.test"
 
   maildev:
     image: maildev/maildev
+    hostname: maildev.test
     ports:
       - "1080:80"
     environment:

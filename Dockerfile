@@ -3,20 +3,22 @@ MAINTAINER Mossuru777 "mossuru777@gmail.com"
 
 USER root
 
+# Copy msmtprc template
+COPY msmtprc.template /usr/local/share/msmtp/
+
 # Install IntelliJ Perl Remote Debugging Related Modules
-RUN cpanm --notest Bundle::Camelcade
+RUN cpanm --notest --no-man-pages Bundle::Camelcade \
 
 # Install & Setup msmtp
-RUN mv /usr/bin/perl /usr/bin/perl.new && mv /usr/bin/perl.orig /usr/bin/perl \
+    && mv /usr/bin/perl /usr/bin/perl.new && mv /usr/bin/perl.orig /usr/bin/perl \
     && apt-get -q update \
     && apt-get -q -y install --no-install-recommends \
          msmtp \
          msmtp-mta \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/* \
-    && mv /usr/bin/perl /usr/bin/perl.orig && mv /usr/bin/perl.new /usr/bin/perl
-COPY msmtprc.template /usr/local/share/msmtp/
-RUN sed -i -e '/set -e/a \\nsudo sh -c "sed -e \\"s@smtp_hostname\\.invalid@\${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@\\" -e \\"s@own_hostname\\.invalid@\$(hostname)@\\" \/usr\/local\/share\/msmtp\/msmtprc.template > \/etc\/msmtprc"' /usr/bin/entrypoint.sh
+    && mv /usr/bin/perl /usr/bin/perl.orig && mv /usr/bin/perl.new /usr/bin/perl \
+    && sed -i -e '/set -e/a \\nsudo sh -c "sed -e \\"s@smtp_hostname\\.invalid@\${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@\\" -e \\"s@own_hostname\\.invalid@\$(hostname)@\\" \/usr\/local\/share\/msmtp\/msmtprc.template > \/etc\/msmtprc"' /usr/bin/entrypoint.sh
 
 # Switch User to www-data
 WORKDIR /var/www

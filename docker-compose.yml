@@ -2,12 +2,11 @@ version: "3.8"
 
 services:
   csenv:
-    image: ghcr.io/mossuru777/docker-csenv-for-dev/csenv-for-dev:latest
+    image: ghcr.io/mossuru777/docker-csenv-for-dev/csenv-for-dev-apache:latest
     hostname: csenv.test
     ports:
-      - "80:80"
-      - "7080:7080"
-      - "7765:7765"
+      - "80:80"     # Apache
+      - "7765:7765" # Perl Remote Debug (Camelcadedb)
 #    volumes:
 #      - type: bind
 #        source: "/foo/bar

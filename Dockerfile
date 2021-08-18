@@ -18,7 +18,10 @@ RUN cpanm --notest --no-man-pages Bundle::Camelcade \
     && apt-get -q clean \
     && rm -rf /var/lib/apt/lists/* \
     && mv /usr/bin/perl /usr/bin/perl.orig && mv /usr/bin/perl.new /usr/bin/perl \
-    && sed -i -e '/set -e/a \\nsudo sh -c "sed -e \\"s@smtp_hostname\\.invalid@\${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@\\" -e \\"s@own_hostname\\.invalid@\$(hostname)@\\" \/usr\/local\/share\/msmtp\/msmtprc.template > \/etc\/msmtprc"' /usr/bin/entrypoint.sh
+    && sed -i -e '/set -e/a \\nsudo sh -c "sed -e \\"s@smtp_hostname\\.invalid@\${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@\\" -e \\"s@own_hostname\\.invalid@\$(hostname)@\\" \/usr\/local\/share\/msmtp\/msmtprc.template > \/etc\/msmtprc"' /usr/bin/entrypoint.sh \
+
+# Add hostname of Gateway(Host) to resolve its IP address
+    && sed -i -e '3aecho -e "$(/sbin/ip -4 route list match 0/0 | /usr/bin/awk "{ print \\$3 }")\\thost.docker.internal" | sudo tee -a /etc/hosts > /dev/null'"\\n" /usr/bin/entrypoint.sh
 
 # Switch User to www-data
 WORKDIR /var/www

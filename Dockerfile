@@ -2,7 +2,7 @@
 # CSEnv for Development
 # Stage Name: csenv-for-dev
 ################################################################################
-FROM ghcr.io/mossuru777/docker-csenv/csenv:latest AS csenv-for-dev
+FROM mossuru777/csenv:latest AS csenv-for-dev
 MAINTAINER Mossuru777 "mossuru777@gmail.com"
 
 # Install useful packages for development

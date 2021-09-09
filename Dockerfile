@@ -69,20 +69,21 @@ RUN mv /usr/bin/perl /usr/bin/perl.new \
     && a2dissite 000-default \
     && a2ensite all-catch \
 
-# Add entrypoint step for launch msmtp and Apache when container starting
+# Add entrypoint step for configure/launch msmtp and apache when container starting
     && sed -i \
-         -e '3ased -e "s@smtp_hostname\.invalid@${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@" -e "s@own_hostname\.invalid@$(hostname)@" /usr/local/share/msmtp/msmtprc.template | sudo tee /etc/msmtprc > /dev/null'"\\n" \
-         -e '3asudo sed -i -e "s@own_hostname\.invalid@$(hostname)@" /etc/apache2/sites-available/all-catch.conf'"\\n" \
-         -e '3aif [ -n "${PERL5_DEBUG_ROLE}" ]; then'\\n \
-         -e '3a  echo -n "\nexport PERL5_DEBUG_ROLE=${PERL5_DEBUG_ROLE}" | sudo tee -a /etc/apache2/envvars > /dev/null'"\\n" \
-         -e '3afi'"\\n" \
-         -e '3aif [ -n "${PERL5_DEBUG_HOST}" ]; then'\\n \
-         -e '3a  echo -n "\nexport PERL5_DEBUG_HOST=${PERL5_DEBUG_HOST}" | sudo tee -a /etc/apache2/envvars > /dev/null'"\\n" \
-         -e '3afi'"\\n" \
-         -e '3aif [ -n "${PERL5_DEBUG_PORT}" ]; then'\\n \
-         -e '3a  echo -n "\nexport PERL5_DEBUG_PORT=${PERL5_DEBUG_PORT}" | sudo tee -a /etc/apache2/envvars > /dev/null'"\\n" \
-         -e '3afi'"\\n" \
-         -e '3aecho "Starting for Apache WebServer..."'"\\n"'sudo /etc/init.d/apache2 start'"\\n" \
+         -e '6ased -e "s@smtp_hostname\.invalid@${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@" -e "s@own_hostname\.invalid@$(hostname)@" /usr/local/share/msmtp/msmtprc.template | sudo tee /etc/msmtprc > /dev/null'"\\n" \
+         -e '6asudo sed -i -e "s@own_hostname\.invalid@$(hostname)@" /etc/apache2/sites-available/all-catch.conf'"\\n" \
+         -e '6asudo rm -f /var/run/apache2/*'"\\n" \
+         -e '6aif [ -n "${PERL5_DEBUG_ROLE}" ]; then' \
+         -e '6a  echo -en "\\nexport PERL5_DEBUG_ROLE=${PERL5_DEBUG_ROLE}" | sudo tee -a /etc/apache2/envvars > /dev/null' \
+         -e '6afi' \
+         -e '6aif [ -n "${PERL5_DEBUG_HOST}" ]; then' \
+         -e '6a  echo -en "\\nexport PERL5_DEBUG_HOST=${PERL5_DEBUG_HOST}" | sudo tee -a /etc/apache2/envvars > /dev/null' \
+         -e '6afi' \
+         -e '6aif [ -n "${PERL5_DEBUG_PORT}" ]; then' \
+         -e '6a  echo -n "\nexport PERL5_DEBUG_PORT=${PERL5_DEBUG_PORT}" | sudo tee -a /etc/apache2/envvars > /dev/null' \
+         -e '6afi'"\\n" \
+         -e '6aecho "Starting for Apache WebServer..."'"\\n"'sudo /etc/init.d/apache2 start'"\\n" \
          /usr/bin/entrypoint.sh \
 
 # Restore the Perl version to that installed

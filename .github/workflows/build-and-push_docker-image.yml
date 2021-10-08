@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  repository_dispatch:
+    types: [upstream-update]
+  workflow_dispatch:
 
 jobs:
   build_and_push:

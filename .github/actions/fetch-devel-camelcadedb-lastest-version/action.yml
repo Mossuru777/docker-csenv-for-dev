@@ -1,0 +1,29 @@
+name: Fetch Devel::Camelcadedb Latest Version
+
+outputs:
+  version:
+    description: "Devel::Camelcadedb Latest Version"
+    value: ${{ steps.latest-fetcher.outputs.version }}
+
+  version-numified:
+    description: "Devel::Camelcadedb Latest Version (Numified)"
+    value: ${{ steps.latest-fetcher.outputs.version-numified }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Fetch Latest Version from metacpan JSON API
+      id: latest-fetcher
+      run: |
+        curl -s -o /tmp/devel-camelcadedb.json https://fastapi.metacpan.org/v1/release/Devel-Camelcadedb
+
+        version="$(jq -r .version /tmp/devel-camelcadedb.json)"
+        version_numified="$(jq -r .version_numified /tmp/devel-camelcadedb.json)"
+
+        echo "::set-output name=version::${version}"
+        echo "::set-output name=version-numified::${version_numified}"
+
+        rm -f /tmp/devel-camelcadedb.json
+
+        echo "Fetch Devel::Camelcadedb Latest Version: ${version} (numified: ${version_numified})"
+      shell: bash

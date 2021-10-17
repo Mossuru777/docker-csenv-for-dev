@@ -9,7 +9,7 @@ services:
       - "7765:7765" # Perl Remote Debug (Camelcadedb)
 #    volumes:
 #      - type: bind
-#        source: "/foo/bar
+#        source: "/foo/bar"
 #        target: "/var/www/html"
 
     environment:

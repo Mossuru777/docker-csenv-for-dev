@@ -1,0 +1,112 @@
+name: Check Devel::Camelcadedb Update
+
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check Devel::Camelcadedb Update
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Fetch Latest Version
+        id: latest-fetcher
+        uses: ./.github/actions/fetch-devel-camelcadedb-lastest-version
+
+      - name: Get UnixTime
+        id: get-unixtime
+        run:
+          echo "::set-output name=unixtime::$(/bin/date "+%s")"
+        shell: bash
+
+      - name: Restore Last Build Version Log
+        id: restore-last-version
+        uses: actions/cache@v2
+        with:
+          path: ~/version/devel-camelcadedb
+          key: version-devel-camelcadedb-${{ steps.get-unixtime.outputs.unixtime }}
+          restore-keys: |
+            version-devel-camelcadedb-
+
+      - name: Fetch Last Build Version
+        id: last-build-fetcher
+        run: |
+          if [[ -f ~/version/devel-camelcadedb/last-numified ]]
+          then
+            version_numified="$(cat ~/version/devel-camelcadedb/last-numified)"
+            version="$(cat ~/version/devel-camelcadedb/last)"
+          else
+            version_numified="0"
+            version="Unknown: cache missing."
+          fi
+          echo "::set-output name=version-numified::${version_numified}"
+          echo "::set-output name=version::${version}"
+        shell: bash
+
+      - name: Compare Version
+        id: version-comparer
+        run: |
+          # https://stackoverflow.com/a/4025065
+          vercomp () {
+              if [[ $1 == $2 ]]
+              then
+                  echo -n "0"
+                  return 0
+              fi
+              local IFS=.
+              local i ver1=($1) ver2=($2)
+              # fill empty fields in ver1 with zeros
+              for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+              do
+                  ver1[i]=0
+              done
+              for ((i=0; i<${#ver1[@]}; i++))
+              do
+                  if [[ -z ${ver2[i]} ]]
+                  then
+                      # fill empty fields in ver2 with zeros
+                      ver2[i]=0
+                  fi
+                  if ((10#${ver1[i]} > 10#${ver2[i]}))
+                  then
+                      echo -n "1"
+                      return 0
+                  fi
+                  if ((10#${ver1[i]} < 10#${ver2[i]}))
+                  then
+                      echo -n "2"
+                      return 0
+                  fi
+              done
+              echo -n "0"
+              return 0
+          }
+
+          result=$(vercomp ${{ steps.latest-fetcher.outputs.version-numified }} ${{ steps.last-build-fetcher.outputs.version-numified }})
+          echo "::set-output name=result::${result}"
+
+          echo "Latest Version: ${{ steps.latest-fetcher.outputs.version-numified }} (${{ steps.latest-fetcher.outputs.version }})"
+          echo "Last Build Version: ${{ steps.last-build-fetcher.outputs.version-numified }} (${{ steps.last-build-fetcher.outputs.version }})"
+          echo "Compare Result: ${result} (0:Latest==Last, 1:Latest>Last, 2:Latest<Last)"
+
+      - name: Trigger Image Build if newer version available
+        if: steps.version-comparer.outputs.result == '1'
+        id: build-trigger
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event-type: dependencies-update
+
+      - name: Store Last Build Version
+        if: steps.build-trigger.conclusion == 'success'
+        run: |
+          mkdir -p ~/version/devel-camelcadedb
+          echo -n '${{ steps.latest-fetcher.outputs.version-numified }}' > ~/version/devel-camelcadedb/last-numified
+          echo -n '${{ steps.latest-fetcher.outputs.version }}' > ~/version/devel-camelcadedb/last
+        shell: bash

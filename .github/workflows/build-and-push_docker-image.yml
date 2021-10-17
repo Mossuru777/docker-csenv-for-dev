@@ -5,7 +5,9 @@ on:
     branches:
       - main
   repository_dispatch:
-    types: [upstream-update]
+    types:
+      - upstream-update
+      - dependencies-update
   workflow_dispatch:
 
 jobs:

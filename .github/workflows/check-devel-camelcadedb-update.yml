@@ -102,3 +102,11 @@ jobs:
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           event-type: dependencies-update
+
+      - name: Store Last Build Version
+        if: steps.build-trigger.conclusion == 'success'
+        run: |
+          mkdir -p ~/version/devel-camelcadedb
+          echo -n '${{ steps.latest-fetcher.outputs.version-numified }}' > ~/version/devel-camelcadedb/last-numified
+          echo -n '${{ steps.latest-fetcher.outputs.version }}' > ~/version/devel-camelcadedb/last
+        shell: bash

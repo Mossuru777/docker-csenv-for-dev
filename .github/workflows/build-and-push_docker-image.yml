@@ -11,12 +11,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  fetch-devel-camelcadedb-latest-version:
-    name: Fetch Devel::Camelcadedb Latest Version
+  build_and_push:
+    name: Build and Push
     runs-on: ubuntu-20.04
-    outputs:
-      version: ${{ steps.fetcher.outputs.version }}
-      version-numified: ${{ steps.fetcher.outputs.version-numified }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,19 +21,8 @@ jobs:
           fetch-depth: 1
 
       - name: Fetch Devel::Camelcadedb Latest Version
-        id: fetcher
+        id: fetch-devel-camelcadedb-latest-version
         uses: ./.github/actions/fetch-devel-camelcadedb-lastest-version
-
-  build_and_push:
-    name: Build and Push
-    needs:
-      - fetch-devel-camelcadedb-latest-version
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -55,7 +41,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/csenv-for-dev:apache-latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/csenv-for-dev:apache-${{ needs.fetch-devel-camelcadedb-latest-version.outputs.version }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/csenv-for-dev:apache-${{ steps.fetch-devel-camelcadedb-latest-version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha
 
@@ -67,30 +53,5 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/csenv-for-dev:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/csenv-for-dev:${{ needs.fetch-devel-camelcadedb-latest-version.outputs.version }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/csenv-for-dev:${{ steps.fetch-devel-camelcadedb-latest-version.outputs.version }}
           cache-from: type=gha
-
-  cache-devel-camelcadedb-version:
-    name: Cache Devel::Camelcadedb Version
-    needs:
-      - fetch-devel-camelcadedb-latest-version
-      - build_and_push
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Get UnixTime
-        id: get-unixtime
-        run: echo "::set-output name=unixtime::$(/bin/date "+%s")"
-        shell: bash
-
-      - name: Setup cache Action
-        uses: actions/cache@v2
-        with:
-          path: ~/version
-          key: version-devel-camelcadedb-${{ steps.get-unixtime.outputs.unixtime }}
-
-      - name: Store Build Devel::Camelcadedb Version To Cache
-        run: |
-          mkdir -p ~/version/devel-camelcadedb
-          echo -n '${{ needs.fetch-devel-camelcadedb-latest-version.outputs.version }}' > ~/version/devel-camelcadedb/last
-          echo -n '${{ needs.fetch-devel-camelcadedb-latest-version.outputs.version-numified }}' > ~/version/devel-camelcadedb/last-numified
-        shell: bash

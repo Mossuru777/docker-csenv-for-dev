@@ -20,8 +20,8 @@ runs:
         version="$(jq -r .version /tmp/devel-camelcadedb.json)"
         version_numified="$(jq -r .version_numified /tmp/devel-camelcadedb.json)"
 
-        echo "::set-output name=version::${version}"
-        echo "::set-output name=version-numified::${version_numified}"
+        echo "version=${version}" >> $GITHUB_OUTPUT
+        echo "version-numified=${version_numified}" >> $GITHUB_OUTPUT
 
         rm -f /tmp/devel-camelcadedb.json
 

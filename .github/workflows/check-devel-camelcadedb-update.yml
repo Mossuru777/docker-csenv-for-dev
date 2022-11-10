@@ -22,7 +22,7 @@ jobs:
       - name: Get UnixTime
         id: get-unixtime
         run:
-          echo "::set-output name=unixtime::$(/bin/date "+%s")"
+          echo "unixtime=$(/bin/date "+%s")" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Restore Last Build Version Log
@@ -45,8 +45,8 @@ jobs:
             version_numified="0"
             version="Unknown: cache missing."
           fi
-          echo "::set-output name=version-numified::${version_numified}"
-          echo "::set-output name=version::${version}"
+          echo "version-numified=${version_numified}" >> $GITHUB_OUTPUT
+          echo "version=${version}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Compare Version
@@ -89,7 +89,7 @@ jobs:
           }
 
           result=$(vercomp ${{ steps.latest-fetcher.outputs.version-numified }} ${{ steps.last-build-fetcher.outputs.version-numified }})
-          echo "::set-output name=result::${result}"
+          echo "result=${result}" >> $GITHUB_OUTPUT
 
           echo "Latest Version: ${{ steps.latest-fetcher.outputs.version-numified }} (${{ steps.latest-fetcher.outputs.version }})"
           echo "Last Build Version: ${{ steps.last-build-fetcher.outputs.version-numified }} (${{ steps.last-build-fetcher.outputs.version }})"

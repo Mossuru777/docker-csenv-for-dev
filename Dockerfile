@@ -11,6 +11,7 @@ RUN apt-get -q update \
          sudo \
          vim \
          dnsutils \
+         iproute2 \
          traceroute \
          git \
          ssh \
@@ -73,7 +74,7 @@ RUN mv /usr/bin/perl /usr/bin/perl.new \
     && sed -i \
          -e '6ased -e "s@smtp_hostname\.invalid@${SMTP_HOSTNAME:-smtp_hostname.undefined.invalid}@" -e "s@own_hostname\.invalid@$(hostname)@" /usr/local/share/msmtp/msmtprc.template | sudo tee /etc/msmtprc > /dev/null'"\\n" \
          -e '6asudo sed -i -e "s@own_hostname\.invalid@$(hostname)@" /etc/apache2/sites-available/all-catch.conf'"\\n" \
-         -e '6asudo rm -f /var/run/apache2/*'"\\n" \
+         -e '6asudo rm -f /var/run/apache2/*.* /var/run/apache2/socks/*.*'"\\n" \
          -e '6aif [ -n "${PERL5_DEBUG_ROLE}" ]; then' \
          -e '6a  echo -en "\\nexport PERL5_DEBUG_ROLE=${PERL5_DEBUG_ROLE}" | sudo tee -a /etc/apache2/envvars > /dev/null' \
          -e '6afi' \
